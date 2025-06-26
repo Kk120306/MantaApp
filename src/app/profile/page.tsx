@@ -1,8 +1,12 @@
+
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { GiMantaRay } from "react-icons/gi";
 import Link from "next/link";
+import dynamic from 'next/dynamic';
+import FollowersModalWrapper from '@/components/modal/FollowersModalWrapper';
+import FollowingModalWrapper from '@/components/modal/FollowingModalWrapper';
 
 
 export default async function ProfilePage() {
@@ -16,6 +20,8 @@ export default async function ProfilePage() {
         where: { id: session.user.id },
         include: {
             posts: true,
+            followers: true,
+            following: true,
             _count: {
                 select: {
                     followers: true,
@@ -40,7 +46,9 @@ export default async function ProfilePage() {
             <p>Email: {user?.email}</p>
             <p>Username: {user?.username}</p>
             <h2>{`Followers: ${user._count.followers}`}</h2>
+            <FollowersModalWrapper followers={user.followers} />
             <h2>{`Following: ${user._count.following}`}</h2>
+            <FollowingModalWrapper following={user.following} />
             <h2>Your Posts</h2>
             <p>Bio : {user?.bio}</p>
             <ul>
