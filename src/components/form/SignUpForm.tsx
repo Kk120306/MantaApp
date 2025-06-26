@@ -17,6 +17,8 @@ import Link from 'next/link';
 import GoogleSignInButton from '../GoogleSignInButton';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 
 const FormSchema = z
     .object({
@@ -34,7 +36,13 @@ const FormSchema = z
     });
 
 const SignUpForm = () => {
+    const { data: session, status } = useSession();
     const router = useRouter();
+    useEffect(() => {
+        if (status === 'authenticated') {
+            router.push('/admin');
+        }
+    }, [status, router]);
     const { toast } = useToast();
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),

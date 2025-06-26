@@ -18,6 +18,8 @@ import GoogleSignInButton from '../GoogleSignInButton';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useToast } from "@/hooks/use-toast"
+import { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 const FormSchema = z.object({
     email: z.string().min(1, 'Email is required').email('Invalid email'),
@@ -28,7 +30,14 @@ const FormSchema = z.object({
 });
 
 const SignInForm = () => {
+    const { data: session, status } = useSession();
     const router = useRouter();
+    useEffect(() => {
+        if (status === 'authenticated') {
+            router.push('/admin');
+        }
+    }, [status, router]);
+    
     const { toast } = useToast();
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
