@@ -5,11 +5,12 @@ import PostCard from "@/components/ui/PostCard";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import RandomUsers from "@/components/ui/RandomUsers";
 
 type Post = {
     id: string;
     content: string;
-    createdAt: string; 
+    createdAt: string;
     author: {
         username: string | null;
     };
@@ -75,40 +76,43 @@ export default function HomePage() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto px-4 py-8">
-            <div className="flex justify-center gap-6 border-b pb-4 font-semibold text-lg">
-                <Button
-                    variant="ghost"
-                    className={activeTab === 'recent' ? 'text-blue-600 border-b-2 border-blue-600' : ''}
-                    onClick={() => setActiveTab('recent')}
-                >
-                    Recent
-                </Button>
-                <Button
-                    variant="ghost"
-                    className={activeTab === 'following' ? 'text-blue-600 border-b-2 border-blue-600' : ''}
-                    onClick={() => setActiveTab('following')}
-                >
-                    Following
-                </Button>
-            </div>
+        <div className="min-h-screen bg-gray-50 flex">
+            <div className="max-w-3xl mx-auto px-4 py-8">
+                <div className="flex justify-center gap-6 border-b pb-4 font-semibold text-lg">
+                    <Button
+                        variant="ghost"
+                        className={activeTab === 'recent' ? 'text-blue-600 border-b-2 border-blue-600' : ''}
+                        onClick={() => setActiveTab('recent')}
+                    >
+                        Recent
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        className={activeTab === 'following' ? 'text-blue-600 border-b-2 border-blue-600' : ''}
+                        onClick={() => setActiveTab('following')}
+                    >
+                        Following
+                    </Button>
+                </div>
 
-            <div className="mt-6 space-y-4">
-                {loading ? (
-                    <p>Loading posts...</p>
-                ) : posts.length === 0 ? (
-                    <p>No posts found.</p>
-                ) : (
-                    posts.map((post) => (
-                        <PostCard
-                            key={post.id}
-                            post={post}
-                            username={post.author.username}
-                        />
-                        // TODO : Fix type error : I dont know why its wrong>>>>
-                    ))
-                )}
-            </div>
-        </div >
+                <div className="mt-6 space-y-4">
+                    {loading ? (
+                        <p>Loading posts...</p>
+                    ) : posts.length === 0 ? (
+                        <p>No posts found.</p>
+                    ) : (
+                        posts.map((post) => (
+                            <PostCard
+                                key={post.id}
+                                post={post}
+                                username={post.author.username}
+                            />
+                            // TODO : Fix type error : I dont know why its wrong>>>>
+                        ))
+                    )}
+                </div>
+            </div >
+            <RandomUsers />
+        </div>
     );
 }

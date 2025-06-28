@@ -25,7 +25,7 @@ const FormSchema = z.object({
     username: z
         .string()
         .min(1, 'Username is required')
-        .min(8, 'Username must have more than 2 characters'),
+        .min(2, 'Username must have more than 2 characters'),
     bio: z.string().optional(),
 });
 
