@@ -31,13 +31,17 @@ export default function FollowingModal({
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                 </DialogHeader>
-                <ul>
-                    {following.map((f) => (
-                        <li key={f.id} className="border-b py-1">
-                            Follower ID: {f.followerId} - Following ID: {f.followingId}
-                        </li>
-                    ))}
-                </ul>
+                {following.length === 0 ? (
+                    <p className="text-gray-500">No following found.</p>
+                ) : (
+                    <ul>
+                        {following.map((f) => (
+                            <li key={f.id} className="border-b py-1">
+                                Follower ID: {f.followerId} - Following ID: {f.followingId}
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </DialogContent>
         </Dialog>
     );

@@ -4,9 +4,9 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { GiMantaRay } from "react-icons/gi";
 import Link from "next/link";
-import dynamic from 'next/dynamic';
 import FollowersModalWrapper from '@/components/modal/FollowersModalWrapper';
 import FollowingModalWrapper from '@/components/modal/FollowingModalWrapper';
+import PostCard from '@/components/ui/PostCard';
 
 
 export default async function ProfilePage() {
@@ -19,7 +19,13 @@ export default async function ProfilePage() {
     const user = await prisma.user.findUnique({
         where: { id: session.user.id },
         include: {
-            posts: true,
+            posts: {
+                include: {
+                    likes: true,
+                    retweets: true,
+                    comments: true,
+                },
+            },
             followers: true,
             following: true,
             _count: {
@@ -49,13 +55,21 @@ export default async function ProfilePage() {
             <FollowersModalWrapper followers={user.followers} />
             <h2>{`Following: ${user._count.following}`}</h2>
             <FollowingModalWrapper following={user.following} />
-            <h2>Your Posts</h2>
             <p>Bio : {user?.bio}</p>
-            <ul>
-                {user.posts.map((post) => (
-                    <li key={post.id}>{post.content}</li>
-                ))}
-            </ul>
-        </div>
+            <h2>Your Posts</h2>
+            {user.posts.length === 0 ? (
+                <p>{`${user?.name} have not made any posts yet.`}</p>
+            ) :
+                (
+                    <ul>
+                        {user.posts.map((post) => (
+                            <li key={post.id} className="mb-4">
+                                <PostCard post={post} username={user?.username ?? "Unknown"} />
+                            </li>
+                        ))}
+                    </ul>
+                )
+            }
+        </div >
     );
 }
