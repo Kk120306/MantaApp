@@ -5,7 +5,6 @@ import { prisma } from "./prisma";
 import GoogleProvider from "next-auth/providers/google";
 import { compare } from "bcrypt";
 
-
 export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(prisma),
     secret: process.env.NEXTAUTH_SECRET,
@@ -51,32 +50,62 @@ export const authOptions: NextAuthOptions = {
 
                 return {
                     id: existingUser.id,
-                    username: existingUser.username,
+                    name: existingUser.name,
                     email: existingUser.email,
+                    username: existingUser.username,
+                    bio: existingUser.bio ?? '',
                 }
             },
         }),
     ],
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
+            // Initial sign in
             if (user) {
-                return {
-                    ...token,
-                    id: user.id,
-                    username: user.username,
+                token.id = user.id;
+                token.username = user.username;
+                token.bio = user.bio;
+            }
+
+            // Handle session updates (when user updates profile)
+            if (trigger === "update" && session) {
+                token.username = session.username;
+                token.bio = session.bio;
+                token.name = session.name;
+                token.email = session.email;
+            }
+
+            // For existing tokens, fetch fresh data if needed
+            if (token.id && (!token.username || token.username === null)) {
+                try {
+                    const user = await prisma.user.findUnique({
+                        where: { id: token.id as string },
+                        select: { username: true, bio: true, name: true, email: true }
+                    });
+
+                    if (user) {
+                        token.username = user.username;
+                        token.bio = user.bio;
+                        token.name = user.name;
+                        token.email = user.email;
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
                 }
             }
+
             return token;
         },
-        async session({ session, user, token }) {
+        async session({ session, token }) {
             return {
                 ...session,
                 user: {
                     ...session.user,
                     id: token.id as string,
-                    username: token.username
-                }
-            }
+                    username: token.username as string,
+                    bio: token.bio as string,
+                },
+            };
         }
     }
 }

@@ -57,6 +57,9 @@ export default async function ProfilePage() {
             <FollowingModalWrapper following={user.following} />
             <p>Bio : {user?.bio}</p>
             <h2>Your Posts</h2>
+            <Link href="/post/create">
+                <button className="bg-green-500 text-white px-4 py-2 rounded">Create Post</button>
+            </Link>
             {user.posts.length === 0 ? (
                 <p>{`${user?.name} have not made any posts yet.`}</p>
             ) :
