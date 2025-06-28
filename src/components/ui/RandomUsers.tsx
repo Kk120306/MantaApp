@@ -21,10 +21,6 @@ export default function RandomUsers() {
             if (res.ok) {
                 const data = await res.json();
                 setUsers(data);
-
-                // If you want to preload which users are already followed,
-                // you could fetch that info here as well
-                // and initialize followedUserIds accordingly
             }
         };
         fetchUsers();
