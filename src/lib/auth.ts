@@ -1,5 +1,5 @@
 import { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials"
+import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prisma";
 import GoogleProvider from "next-auth/providers/google";
@@ -33,7 +33,7 @@ export const authOptions: NextAuthOptions = {
                 const existingUser = await prisma.user.findUnique({
                     where: {
                         email: credentials.email,
-                    }
+                    },
                 });
 
                 if (!existingUser) {
@@ -50,47 +50,34 @@ export const authOptions: NextAuthOptions = {
 
                 return {
                     id: existingUser.id,
-                    name: existingUser.name,
                     email: existingUser.email,
-                    username: existingUser.username,
-                    bio: existingUser.bio ?? '',
-                }
+                };
             },
         }),
     ],
     callbacks: {
         async jwt({ token, user, trigger, session }) {
-            // Initial sign in
             if (user) {
                 token.id = user.id;
-                token.username = user.username;
-                token.bio = user.bio;
+                token.email = user.email;
             }
 
-            // Handle session updates (when user updates profile)
             if (trigger === "update" && session) {
-                token.username = session.username;
-                token.bio = session.bio;
-                token.name = session.name;
                 token.email = session.email;
             }
 
-            // For existing tokens, fetch fresh data if needed
-            if (token.id && (!token.username || token.username === null)) {
+            if (token.id && (!token.email || token.email === null)) {
                 try {
                     const user = await prisma.user.findUnique({
                         where: { id: token.id as string },
-                        select: { username: true, bio: true, name: true, email: true }
+                        select: { email: true },
                     });
 
                     if (user) {
-                        token.username = user.username;
-                        token.bio = user.bio;
-                        token.name = user.name;
                         token.email = user.email;
                     }
                 } catch (error) {
-                    console.error("Error fetching user data:", error);
+                    console.error("Error fetching user email:", error);
                 }
             }
 
@@ -102,10 +89,9 @@ export const authOptions: NextAuthOptions = {
                 user: {
                     ...session.user,
                     id: token.id as string,
-                    username: token.username as string,
-                    bio: token.bio as string,
+                    email: token.email as string,
                 },
             };
-        }
-    }
-}
+        },
+    },
+};
