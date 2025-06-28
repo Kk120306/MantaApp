@@ -1,10 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { buttonVariants } from './ui/button';
 import { GiMantaRay } from "react-icons/gi";
 import { useSession } from 'next-auth/react';
-import UserAccountNav from './UserAccountNav';
 import { CgProfile } from "react-icons/cg";
 
 
@@ -17,13 +15,6 @@ const Navbar = () => {
                 <Link href='/'>
                     <GiMantaRay />
                 </Link>
-                {status === 'loading' ? null : session?.user ? (
-                    <UserAccountNav user={session.user} />
-                ) : (
-                    <Link className={buttonVariants()} href='/sign-in'>
-                        Sign in
-                    </Link>
-                )}
                 {session?.user && (
                     <div>
                         <Link href="/profile">

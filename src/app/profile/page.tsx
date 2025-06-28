@@ -7,13 +7,15 @@ import Link from "next/link";
 import FollowersModalWrapper from '@/components/modal/FollowersModalWrapper';
 import FollowingModalWrapper from '@/components/modal/FollowingModalWrapper';
 import PostCard from '@/components/ui/PostCard';
+import { redirect } from 'next/navigation';
+
 
 
 export default async function ProfilePage() {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-        return <p>Please sign in to view your profile.</p>;
+        redirect('/sign-in');
     }
 
     const user = await prisma.user.findUnique({
