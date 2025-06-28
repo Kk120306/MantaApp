@@ -30,3 +30,33 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
     }
 }
+
+export async function GET(req: Request) {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email! },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                bio: true,
+            },
+        });
+
+        if (!user) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+
+        return NextResponse.json(user);
+    } catch (error) {
+        console.error("Fetch error:", error);
+        return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    }
+}

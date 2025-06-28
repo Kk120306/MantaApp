@@ -15,9 +15,9 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/Textarea';
 import Link from 'next/link';
-import { useSession, getSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const FormSchema = z.object({
     name: z.string().min(1, 'Name is required'),
@@ -29,9 +29,18 @@ const FormSchema = z.object({
     bio: z.string().optional(),
 });
 
+interface UserProfile {
+    name: string;
+    email: string;
+    username: string;
+    bio: string;
+}
+
 const EditProfileForm = () => {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -41,25 +50,42 @@ const EditProfileForm = () => {
             username: '',
             bio: '',
         },
-    })
-
-    // TODO : Probably just create a API fetch instead of leaving evertyhing in the JWT coockie
-    useEffect(() => {
-        if (session?.user) {
-            form.reset({
-                name: session.user.name || '',
-                email: session.user.email || '',
-                username: session.user.username || '',
-                bio: session.user.bio || '',
-            });
-        }
-    }, [session, form]);
+    });
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        const fetchUserProfile = async () => {
+            if (session?.user?.id) {
+                try {
+                    const res = await fetch(`/api/profile/`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    if (res.ok) {
+                        const profile = await res.json();
+                        setUserProfile(profile);
+                        form.reset({
+                            name: profile.name || '',
+                            email: profile.email || '',
+                            username: profile.username || '',
+                            bio: profile.bio || '',
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching profile:', error);
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        if (status === 'authenticated') {
+            fetchUserProfile();
+        } else if (status === 'unauthenticated') {
             router.push('/sign-in');
         }
-    }, [status, router]);
+    }, [session, status, router, form]);
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
@@ -78,7 +104,7 @@ const EditProfileForm = () => {
             const updated = await res.json();
             console.log("Updated user:", updated);
 
-            await getSession();
+            setUserProfile(updated);
 
             router.push('/');
         } catch (error) {
@@ -86,7 +112,7 @@ const EditProfileForm = () => {
         }
     }
 
-    if (status === 'loading') {
+    if (status === 'loading' || isLoading) {
         return <div>Loading...</div>;
     }
 
