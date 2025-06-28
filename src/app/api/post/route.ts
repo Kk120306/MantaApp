@@ -24,3 +24,24 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: "Internal server error" }, { status: 500 });
     }
 }
+
+
+export async function GET() {
+    const posts = await prisma.post.findMany({
+        include: {
+          author: {
+            select: {
+              username: true,
+            },
+          },
+          likes: true,
+          comments: true,
+          retweets: true, 
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      
+
+
+    return NextResponse.json(posts);
+}

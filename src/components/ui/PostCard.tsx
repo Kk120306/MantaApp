@@ -1,5 +1,10 @@
-
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+    CardContent,
+} from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
@@ -11,6 +16,9 @@ type PostProps = {
         id: string;
         createdAt: Date;
         content: string;
+        author: {
+            username: string | null;
+        };
         likes: {
             createdAt: Date;
             id: string;
@@ -31,17 +39,17 @@ type PostProps = {
             postId: string;
         }[];
     };
-    username: string;
 };
 
-export default function PostCard({ post, username }: PostProps) {
-    const { createdAt, content, likes, retweets } = post;
+export default function PostCard({ post }: PostProps) {
+    const { createdAt, content, likes, retweets, author } = post;
+    const username = author?.username ?? "unknown";
 
     return (
         <Card className="max-w-xl mx-auto mb-4">
             <CardHeader className="flex items-center space-x-4">
                 <Avatar>
-                    <AvatarFallback>{username}</AvatarFallback>
+                    <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div>
                     <CardTitle className="text-base font-semibold">{username}</CardTitle>

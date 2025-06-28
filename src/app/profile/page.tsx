@@ -23,6 +23,11 @@ export default async function ProfilePage() {
         include: {
             posts: {
                 include: {
+                    author: {
+                        select: {
+                            username: true,
+                        },
+                    },
                     likes: true,
                     retweets: true,
                     comments: true,
@@ -38,6 +43,7 @@ export default async function ProfilePage() {
             },
         },
     });
+
 
     if (!user) {
         return <p>User not found.</p>;
@@ -69,7 +75,7 @@ export default async function ProfilePage() {
                     <ul>
                         {user.posts.map((post) => (
                             <li key={post.id} className="mb-4">
-                                <PostCard post={post} username={user?.username ?? "Unknown"} />
+                                <PostCard post={post} />
                             </li>
                         ))}
                     </ul>
